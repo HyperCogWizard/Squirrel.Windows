@@ -39,7 +39,12 @@ namespace Squirrel.Tests
                         return;
                     }
 
-                    var target = Path.Combine(RootPath, ctx.Request.Url.AbsolutePath.Replace('/', Path.DirectorySeparatorChar).Substring(1));
+                    var relativePath = ctx.Request.Url.AbsolutePath.Replace('/', Path.DirectorySeparatorChar).Substring(1);
+                    if (IsPathTraversal(relativePath)) {
+                        closeResponseWith(ctx, 400, "Invalid path");
+                        return;
+                    }
+                    var target = Path.Combine(RootPath, relativePath);
                     var fi = new FileInfo(target);
 
                     if (!fi.FullName.StartsWith(RootPath)) {
@@ -74,6 +79,11 @@ namespace Squirrel.Tests
 
             inner = ret;
             return ret;
+        }
+
+        private static bool IsPathTraversal(string path)
+        {
+            return path.Contains("..") || path.Contains(Path.DirectorySeparatorChar.ToString()) || path.Contains(Path.AltDirectorySeparatorChar.ToString());
         }
 
         static void closeResponseWith(HttpListenerContext ctx, int statusCode, string message)
