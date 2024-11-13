@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Net;
+using System.Net.WebUtility;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -90,7 +91,7 @@ namespace Squirrel.Tests
         {
             ctx.Response.StatusCode = statusCode;
             using (var sw = new StreamWriter(ctx.Response.OutputStream, Encoding.UTF8)) {
-                sw.WriteLine(message);
+                sw.WriteLine(WebUtility.HtmlEncode(message));
             }
             ctx.Response.Close();
         }
